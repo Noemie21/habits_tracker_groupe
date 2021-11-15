@@ -1,7 +1,12 @@
+import re
 from django.contrib.auth.models import User, Group
-from django.db.models.fields import NullBooleanField
+from django.db.models.query import QuerySet
 from rest_framework import serializers
+from rest_framework.fields import SerializerMethodField
 from habits_tracker_groupe.models import Done, Habit
+from rest_framework.reverse import reverse
+
+
 
 
 class UserSerializer(serializers.HyperlinkedModelSerializer):
@@ -15,24 +20,26 @@ class GroupSerializer(serializers.HyperlinkedModelSerializer):
         model = Group
         fields = ['url', 'name']
 
-class HabitSerializer(serializers.HyperlinkedModelSerializer):
-    done = serializers.HyperlinkedRelatedField(
-        many=True,
-        queryset=Done.objects.all(),
-        view_name='habit-done',
-        allow_null=True
-    )
-    class Meta:
-        model = Habit
-        fields = ['url', 'name', "interval", "qty", "done", "created"]
-    
-    def to_internal_value(self, data):
-        test = super().to_internal_value(data)
-        test["done"] = None
-        return test
-
-
 class DoneSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = Done
-        fields = ['at']
+        fields = ['url','at', 'habits']
+        
+class HabitSerializer(serializers.HyperlinkedModelSerializer):
+    def get_done(self, obj):
+        print(obj.id)
+        return reverse('habit-dones-list', args=[obj.id], request=self.context["request"])
+
+
+    done = SerializerMethodField()
+
+    class Meta:
+        model = Habit
+        fields = ['url', 'name', "interval", "qty", "created", "done"]
+
+    
+    
+
+
+
+

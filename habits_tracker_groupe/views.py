@@ -1,11 +1,16 @@
 from django.contrib.auth.models import User, Group
+from django.db.models.query import QuerySet
 from rest_framework import viewsets
 from rest_framework import permissions
 from habits_tracker_groupe.models import Done, Habit
 
-from habits_tracker_groupe.serializers import GroupSerializer, UserSerializer, HabitSerializer
+from habits_tracker_groupe.serializers import DoneSerializer, GroupSerializer, UserSerializer, HabitSerializer
+from rest_framework.permissions import IsAuthenticated
 
 class UserViewSet(viewsets.ModelViewSet):
+    permission_classes = (IsAuthenticated,)
+
+    
     """
     API endpoint that allows users to be viewed or edited.
     """
@@ -34,6 +39,9 @@ class DoneViewSet(viewsets.ModelViewSet):
     """
     API endpoint that allows groups to be viewed or edited.
     """
-    queryset = Done.objects.all()
-    serializer_class = HabitSerializer
+    serializer_class = DoneSerializer
     permission_classes = [permissions.IsAuthenticated]
+
+    def get_queryset(self):
+        return Done.objects.filter(habits=self.kwargs['habit_pk'])
+
