@@ -49,25 +49,13 @@ class DoneViewSet(viewsets.ModelViewSet):
     permission_classes = [permissions.IsAuthenticated]
 
     def get_queryset(self):
-        return Done.objects.filter(habits=self.kwargs['habit_pk'])
-
-
-class CurrentUserViewSet(viewsets.ViewSet):
-    """API endpoint that allows to retrieve current user informations"""
-
-    def list(self, request):
-        return Response({
-            'username': request.user.username,
-            'email': request.user.email,
-        })
-
-    def retrieve(self, request, pk=None):
-        return Response({
-            'username': request.user.username,
-            'email': request.user.email,
-        })
+        try: 
+            return Done.objects.filter(habits=self.kwargs['habit_pk'])
+        except:
+            return Done.objects.all()
         
 class CurrentUser(APIView):
+    permission_classes = [permissions.IsAuthenticated]
     def get(self, request):
         serializer = UserSerializer(request.user, context={'request': request})
         return Response(serializer.data)
