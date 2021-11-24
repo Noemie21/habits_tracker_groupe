@@ -6,13 +6,11 @@ from rest_framework.fields import SerializerMethodField
 from habits_tracker_groupe.models import Done, Habit
 from rest_framework.reverse import reverse
 
-
-
-
 class UserSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = User
-        fields = ['url', 'username', 'email', 'groups']
+        fields = ['url', 'username', 'email']
+        
 
 
 class GroupSerializer(serializers.HyperlinkedModelSerializer):
@@ -37,8 +35,6 @@ class HabitSerializer(serializers.HyperlinkedModelSerializer):
         model = Habit
         fields = ['url', 'name', "interval", "qty", "created", "done"]
 
-    
-    
 
 
 

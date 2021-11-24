@@ -1,11 +1,17 @@
+from decimal import Context
 from django.contrib.auth.models import User, Group
 from django.db.models.query import QuerySet
-from rest_framework import viewsets
-from rest_framework import permissions
+from rest_framework import viewsets, permissions
+from rest_framework.views import APIView
+from habits_tracker_groupe import serializers
 from habits_tracker_groupe.models import Done, Habit
+from rest_framework.response import Response
 
 from habits_tracker_groupe.serializers import DoneSerializer, GroupSerializer, UserSerializer, HabitSerializer
 from rest_framework.permissions import IsAuthenticated
+from rest_framework.decorators import api_view
+from rest_framework import status
+
 
 class UserViewSet(viewsets.ModelViewSet):
     permission_classes = (IsAuthenticated,)
@@ -44,4 +50,36 @@ class DoneViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         return Done.objects.filter(habits=self.kwargs['habit_pk'])
+
+
+class CurrentUserViewSet(viewsets.ViewSet):
+    """API endpoint that allows to retrieve current user informations"""
+
+    def list(self, request):
+        return Response({
+            'username': request.user.username,
+            'email': request.user.email,
+        })
+
+    def retrieve(self, request, pk=None):
+        return Response({
+            'username': request.user.username,
+            'email': request.user.email,
+        })
+        
+class CurrentUser(APIView):
+    def get(self, request):
+        serializer = UserSerializer(request.user, context={'request': request})
+        return Response(serializer.data)
+
+    def put(self, request):
+        serializer = UserSerializer(request.user,data=request.data, context={'request': request})
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+    def put(self, request):
+        serializer = UserSerializer(request.user, context={'request': request})
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
